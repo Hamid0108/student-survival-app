@@ -52,7 +52,7 @@ export default function Layout({ children }) {
       </aside>
 
       {/* Mobile Header + Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col w-full overflow-hidden">
         {/* Mobile Header */}
         <div className="md:hidden relative flex items-center bg-gradient-to-r from-slate-800 to-slate-900 border-b border-slate-700 p-4">
           <h1 className="text-lg font-black text-white flex items-center gap-2 flex-1">
@@ -89,7 +89,7 @@ export default function Layout({ children }) {
         )}
 
         {/* Main Content */}
-        <main className="flex-1 p-6 md:p-8 overflow-y-auto">
+        <main className="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto overflow-x-hidden w-full">
           {children}
         </main>
       </div>
