@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { useAuth } from './AuthContext';
 import * as supabaseService from '../services/supabaseService';
 
@@ -6,6 +6,7 @@ const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
   const { user } = useAuth();
+  const hasLoadedFromSupabase = useRef(false);
 
   // Priorities state
   const [priorities, setPriorities] = useState(() => {
@@ -20,26 +21,7 @@ export const AppProvider = ({ children }) => {
   // Tasks state
   const [tasks, setTasks] = useState(() => {
     const saved = localStorage.getItem('tasks');
-    return saved
-      ? JSON.parse(saved)
-      : [
-          {
-            id: '1',
-            text: 'Finish assignment',
-            done: false,
-            priority: 'High',
-            date: new Date().toISOString().split('T')[0],
-            dueDate: null,
-          },
-          {
-            id: '2',
-            text: 'Study Math Chapter 5',
-            done: false,
-            priority: 'Medium',
-            date: new Date().toISOString().split('T')[0],
-            dueDate: null,
-          },
-        ];
+    return saved ? JSON.parse(saved) : [];
   });
 
   // GPA state
@@ -79,14 +61,14 @@ export const AppProvider = ({ children }) => {
 
   // Fetch data from Supabase on login
   useEffect(() => {
-    if (user) {
+    if (user && !hasLoadedFromSupabase.current) {
       loadDataFromSupabase();
+      hasLoadedFromSupabase.current = true;
     }
   }, [user]);
 
   const loadDataFromSupabase = async () => {
     try {
-      // Fetch all data from Supabase
       const [tasksData, prioritiesData, examsData, reviewsData, gpaData, pomodoroData] =
         await Promise.all([
           supabaseService.tasksService.fetchTasks(user.id),
@@ -97,23 +79,23 @@ export const AppProvider = ({ children }) => {
           supabaseService.pomodoroService.fetchSettings(user.id),
         ]);
 
-      // Only update state if we have data from Supabase
-      if (tasksData.length > 0) {
+      // Load from Supabase if data exists, otherwise keep defaults
+      if (tasksData && tasksData.length > 0) {
         setTasks(tasksData);
         localStorage.setItem('tasks', JSON.stringify(tasksData));
       }
 
-      if (prioritiesData.length > 0) {
+      if (prioritiesData && prioritiesData.length > 0) {
         setPriorities(prioritiesData);
         localStorage.setItem('priorities', JSON.stringify(prioritiesData));
       }
 
-      if (examsData.length > 0) {
+      if (examsData && examsData.length > 0) {
         setExams(examsData);
         localStorage.setItem('exams', JSON.stringify(examsData));
       }
 
-      if (reviewsData.length > 0) {
+      if (reviewsData && reviewsData.length > 0) {
         setWeeklyReview(reviewsData);
         localStorage.setItem('weeklyReview', JSON.stringify(reviewsData));
       }
@@ -135,44 +117,41 @@ export const AppProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('Error loading data from Supabase:', error);
-      // Keep using localStorage data if Supabase fails
     }
   };
 
-  // Persist to localStorage whenever state changes
+  // Persist to localStorage and sync to Supabase
   useEffect(() => {
     localStorage.setItem('priorities', JSON.stringify(priorities));
-    // Sync to Supabase if logged in
-    if (user && priorities.length > 0) {
+    if (user && hasLoadedFromSupabase.current) {
       syncPrioritiesToSupabase(priorities);
     }
   }, [priorities, user]);
 
   useEffect(() => {
     localStorage.setItem('tasks', JSON.stringify(tasks));
-    // Sync to Supabase if logged in
-    if (user && tasks.length > 0) {
+    if (user && hasLoadedFromSupabase.current) {
       syncTasksToSupabase(tasks);
     }
   }, [tasks, user]);
 
   useEffect(() => {
     localStorage.setItem('gpa', gpa.toString());
-    if (user) {
+    if (user && hasLoadedFromSupabase.current) {
       syncGPAToSupabase(gpa, targetGpa);
     }
   }, [gpa, user]);
 
   useEffect(() => {
     localStorage.setItem('targetGpa', targetGpa.toString());
-    if (user) {
+    if (user && hasLoadedFromSupabase.current) {
       syncGPAToSupabase(gpa, targetGpa);
     }
   }, [targetGpa, user]);
 
   useEffect(() => {
     localStorage.setItem('pomodoroSettings', JSON.stringify(pomodoroSettings));
-    if (user) {
+    if (user && hasLoadedFromSupabase.current) {
       syncPomodoroToSupabase(pomodoroSettings);
     }
   }, [pomodoroSettings, user]);
@@ -183,23 +162,22 @@ export const AppProvider = ({ children }) => {
 
   useEffect(() => {
     localStorage.setItem('exams', JSON.stringify(exams));
-    if (user && exams.length > 0) {
+    if (user && hasLoadedFromSupabase.current) {
       syncExamsToSupabase(exams);
     }
   }, [exams, user]);
 
-  // Background sync functions
+  // Sync functions - only sync new/modified items
   const syncTasksToSupabase = async (tasksToSync) => {
     if (!user) return;
     try {
       for (const task of tasksToSync) {
-        // For new tasks (local IDs), insert them
-        if (typeof task.id === 'number' || task.id.length < 36) {
+        // Only sync tasks with local IDs (not already in Supabase)
+        if (typeof task.id === 'string' && task.id.length < 20) {
           const newTask = await supabaseService.tasksService.addTask(user.id, task);
-          // Replace local ID with server ID
           if (newTask) {
             setTasks((prev) =>
-              prev.map((t) => (t.id === task.id ? { ...newTask } : t))
+              prev.map((t) => (t.id === task.id ? newTask : t))
             );
           }
         }
@@ -213,14 +191,14 @@ export const AppProvider = ({ children }) => {
     if (!user) return;
     try {
       for (const priority of prioritiesToSync) {
-        if (typeof priority.id === 'number' || priority.id.length < 36) {
+        if (typeof priority.id === 'string' && priority.id.length < 20) {
           const newPriority = await supabaseService.prioritiesService.addPriority(
             user.id,
             priority
           );
           if (newPriority) {
             setPriorities((prev) =>
-              prev.map((p) => (p.id === priority.id ? { ...newPriority } : p))
+              prev.map((p) => (p.id === priority.id ? newPriority : p))
             );
           }
         }
@@ -246,10 +224,10 @@ export const AppProvider = ({ children }) => {
     if (!user) return;
     try {
       for (const exam of examsToSync) {
-        if (typeof exam.id === 'number' || exam.id.length < 36) {
+        if (typeof exam.id === 'string' && exam.id.length < 20) {
           const newExam = await supabaseService.examsService.addExam(user.id, exam);
           if (newExam) {
-            setExams((prev) => prev.map((e) => (e.id === exam.id ? { ...newExam } : e)));
+            setExams((prev) => prev.map((e) => (e.id === exam.id ? newExam : e)));
           }
         }
       }
@@ -279,7 +257,6 @@ export const AppProvider = ({ children }) => {
     };
     setTasks([...tasks, newTask]);
 
-    // Sync to Supabase if logged in
     if (user) {
       supabaseService.tasksService
         .addTask(user.id, newTask)
@@ -299,8 +276,7 @@ export const AppProvider = ({ children }) => {
     const updatedTask = { ...task, done: !task.done };
     setTasks(tasks.map((t) => (t.id === id ? updatedTask : t)));
 
-    // Sync to Supabase if logged in and has UUID id
-    if (user && id.length > 10) {
+    if (user && id.length > 20) {
       supabaseService.tasksService
         .updateTask(id, { done: !task.done }, user.id)
         .catch((error) => console.error('Error updating task in Supabase:', error));
@@ -310,8 +286,7 @@ export const AppProvider = ({ children }) => {
   const deleteTask = (id) => {
     setTasks(tasks.filter((t) => t.id !== id));
 
-    // Sync to Supabase if logged in and has UUID id
-    if (user && id.length > 10) {
+    if (user && id.length > 20) {
       supabaseService.tasksService
         .deleteTask(id, user.id)
         .catch((error) => console.error('Error deleting task from Supabase:', error));
@@ -321,20 +296,17 @@ export const AppProvider = ({ children }) => {
   const updateTask = (id, updates) => {
     setTasks(tasks.map((t) => (t.id === id ? { ...t, ...updates } : t)));
 
-    // Sync to Supabase if logged in and has UUID id
-    if (user && id.length > 10) {
+    if (user && id.length > 20) {
       supabaseService.tasksService
         .updateTask(id, updates, user.id)
         .catch((error) => console.error('Error updating task in Supabase:', error));
     }
   };
 
-  // Priority management functions
   const addPriority = (name, color, emoji = '⭐') => {
     const newPriority = { id: Date.now().toString(), name, color, emoji };
     setPriorities([...priorities, newPriority]);
 
-    // Sync to Supabase if logged in
     if (user) {
       supabaseService.prioritiesService
         .addPriority(user.id, newPriority)
@@ -350,8 +322,7 @@ export const AppProvider = ({ children }) => {
   const updatePriority = (id, updates) => {
     setPriorities(priorities.map((p) => (p.id === id ? { ...p, ...updates } : p)));
 
-    // Sync to Supabase if logged in and has UUID id
-    if (user && id.length > 10) {
+    if (user && id.length > 20) {
       supabaseService.prioritiesService
         .updatePriority(id, updates, user.id)
         .catch((error) => console.error('Error updating priority in Supabase:', error));
@@ -361,20 +332,17 @@ export const AppProvider = ({ children }) => {
   const deletePriority = (id) => {
     setPriorities(priorities.filter((p) => p.id !== id));
 
-    // Sync to Supabase if logged in and has UUID id
-    if (user && id.length > 10) {
+    if (user && id.length > 20) {
       supabaseService.prioritiesService
         .deletePriority(id, user.id)
         .catch((error) => console.error('Error deleting priority from Supabase:', error));
     }
   };
 
-  // Exam management functions
   const addExam = (exam) => {
     const newExam = { id: Date.now().toString(), ...exam };
     setExams([...exams, newExam]);
 
-    // Sync to Supabase if logged in
     if (user) {
       supabaseService.examsService
         .addExam(user.id, newExam)
@@ -390,8 +358,7 @@ export const AppProvider = ({ children }) => {
   const updateExam = (id, updates) => {
     setExams(exams.map((e) => (e.id === id ? { ...e, ...updates } : e)));
 
-    // Sync to Supabase if logged in and has UUID id
-    if (user && id.length > 10) {
+    if (user && id.length > 20) {
       supabaseService.examsService
         .updateExam(id, updates, user.id)
         .catch((error) => console.error('Error updating exam in Supabase:', error));
@@ -401,22 +368,19 @@ export const AppProvider = ({ children }) => {
   const deleteExam = (id) => {
     setExams(exams.filter((e) => e.id !== id));
 
-    // Sync to Supabase if logged in and has UUID id
-    if (user && id.length > 10) {
+    if (user && id.length > 20) {
       supabaseService.examsService
         .deleteExam(id, user.id)
         .catch((error) => console.error('Error deleting exam from Supabase:', error));
     }
   };
 
-  // Weekly review functions
   const addWeeklyReview = (review) => {
     setWeeklyReview([
       ...weeklyReview,
       { id: Date.now().toString(), date: new Date().toISOString(), ...review },
     ]);
 
-    // Sync to Supabase if logged in
     if (user) {
       supabaseService.reviewsService
         .addReview(user.id, review)
@@ -424,7 +388,6 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  // Helper functions
   const getTasksByDate = (date) => {
     return tasks.filter((t) => t.date === date);
   };
@@ -444,7 +407,6 @@ export const AppProvider = ({ children }) => {
   };
 
   const value = {
-    // State
     priorities,
     tasks,
     gpa,
@@ -455,8 +417,6 @@ export const AppProvider = ({ children }) => {
     setPomodoroSettings,
     weeklyReview,
     exams,
-
-    // Functions
     addTask,
     toggleTask,
     deleteTask,
