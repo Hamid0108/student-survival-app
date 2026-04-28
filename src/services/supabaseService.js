@@ -28,7 +28,7 @@ export const tasksService = {
           done: task.done || false,
           priority: task.priority,
           date: task.date,
-          dueDate: task.dueDate,
+          due_date: task.dueDate,
         },
       ])
       .select();
@@ -311,8 +311,8 @@ export const batchService = {
       done: t.done,
       priority: t.priority,
       date: t.date,
-      dueDate: t.dueDate,
-      created_at: t.created_at,
+      due_date: t.dueDate,  // Convert camelCase to snake_case
+      created_at: t.created_at || new Date().toISOString(),
     }));
 
     const { data, error } = await supabase
@@ -332,7 +332,7 @@ export const batchService = {
       name: p.name,
       color: p.color,
       emoji: p.emoji,
-      created_at: p.created_at,
+      created_at: p.created_at || new Date().toISOString(),
     }));
 
     const { data, error } = await supabase
