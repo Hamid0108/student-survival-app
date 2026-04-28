@@ -86,14 +86,14 @@ export default function PomodoroTimer() {
       </div>
 
       {/* Main Timer Display */}
-      <div className="bg-gradient-to-br from-slate-700 to-slate-800 border border-slate-600 rounded-3xl p-12 shadow-2xl">
+      <div className="bg-gradient-to-br from-slate-700 to-slate-800 border border-slate-600 rounded-3xl p-6 md:p-12 shadow-2xl">
         <div className="text-center space-y-6">
           {/* Phase Indicator */}
           <div>
             <p className="text-sm font-semibold text-slate-400 uppercase tracking-widest mb-2">
               {isWorkSession ? '🔥 Work Session' : '☕ Break Time'}
             </p>
-            <h2 className="text-5xl font-black text-white mb-4">
+            <h2 className="text-3xl md:text-5xl font-black text-white mb-4">
               {formatTime(timeLeft)}
             </h2>
           </div>
@@ -113,10 +113,10 @@ export default function PomodoroTimer() {
           </div>
 
           {/* Controls */}
-          <div className="flex gap-4 justify-center pt-4">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center pt-4">
             <button
               onClick={() => setIsRunning(!isRunning)}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-4 rounded-xl transition-all transform hover:scale-105 active:scale-95 shadow-lg"
+              className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 sm:px-8 py-3 sm:py-4 rounded-xl transition-all transform hover:scale-105 active:scale-95 shadow-lg"
             >
               {isRunning ? (
                 <>
@@ -133,7 +133,7 @@ export default function PomodoroTimer() {
 
             <button
               onClick={handleReset}
-              className="flex items-center gap-2 bg-slate-600 hover:bg-slate-500 text-white font-bold px-8 py-4 rounded-xl transition-colors"
+              className="flex items-center justify-center gap-2 bg-slate-600 hover:bg-slate-500 text-white font-bold px-6 sm:px-8 py-3 sm:py-4 rounded-xl transition-colors"
             >
               <RotateCcw className="w-5 h-5" />
               Reset
@@ -141,7 +141,7 @@ export default function PomodoroTimer() {
 
             <button
               onClick={handleSkip}
-              className="flex items-center gap-2 bg-slate-600 hover:bg-slate-500 text-white font-bold px-8 py-4 rounded-xl transition-colors"
+              className="flex items-center justify-center gap-2 bg-slate-600 hover:bg-slate-500 text-white font-bold px-6 sm:px-8 py-3 sm:py-4 rounded-xl transition-colors"
             >
               Skip Phase
             </button>
@@ -156,7 +156,7 @@ export default function PomodoroTimer() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <StatsCard
           title="Work Duration"
           value={`${pomodoroSettings.workDuration}m`}
@@ -177,7 +177,7 @@ export default function PomodoroTimer() {
       {/* Settings */}
       <div className="bg-slate-700/50 border border-slate-600/50 rounded-2xl p-6">
         <h2 className="text-lg font-bold text-white mb-4">⚙️ Settings</h2>
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-semibold text-slate-300 mb-2">
               Work Duration (minutes)

@@ -102,7 +102,7 @@ export default function PrioritySelector({ onSelect, selectedPriority, showManag
 
               <div>
                 <label className="block text-sm text-slate-300 mb-2">Color</label>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                   {colors.map(color => (
                     <button
                       key={color}
@@ -117,7 +117,7 @@ export default function PrioritySelector({ onSelect, selectedPriority, showManag
 
               <div>
                 <label className="block text-sm text-slate-300 mb-2">Emoji</label>
-                <div className="grid grid-cols-5 gap-2">
+                <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
                   {emojis.map(emoji => (
                     <button
                       key={emoji}

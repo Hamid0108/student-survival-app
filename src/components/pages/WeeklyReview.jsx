@@ -51,7 +51,7 @@ export default function WeeklyReview() {
       </div>
 
       {/* This Week Stats */}
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-slate-700/50 border border-slate-600/50 rounded-2xl p-6">
           <p className="text-sm text-slate-400 mb-2">This Week</p>
           <p className="text-3xl font-black text-white">{stats.completed}</p>
@@ -173,7 +173,7 @@ export default function WeeklyReview() {
                   </div>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <h4 className="font-semibold text-white mb-2">✓ What went well</h4>
                     <p className="text-sm text-slate-300">{review.whatWentWell}</p>
