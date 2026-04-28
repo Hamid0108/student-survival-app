@@ -7,8 +7,24 @@ const AppContext = createContext();
 export const AppProvider = ({ children }) => {
   const { user } = useAuth();
   const hasLoadedFromSupabase = useRef(false);
+  const lastSyncTimeRef = useRef({
+    tasks: 0,
+    priorities: 0,
+    gpa: 0,
+    exams: 0,
+    pomodoro: 0,
+  });
 
-  // Priorities state
+  // Helper to debounce syncs (prevent syncing the same data multiple times)
+  const shouldSync = (key) => {
+    const now = Date.now();
+    const lastTime = lastSyncTimeRef.current[key] || 0;
+    return now - lastTime > 2000; // Only sync if more than 2 seconds since last sync
+  };
+
+  const recordSync = (key) => {
+    lastSyncTimeRef.current[key] = Date.now();
+  };
   const [priorities, setPriorities] = useState(() => {
     const saved = localStorage.getItem('priorities');
     return saved ? JSON.parse(saved) : [];
@@ -129,35 +145,40 @@ export const AppProvider = ({ children }) => {
   // Persist to localStorage and sync to Supabase
   useEffect(() => {
     localStorage.setItem('priorities', JSON.stringify(priorities));
-    if (user && hasLoadedFromSupabase.current) {
+    if (user && hasLoadedFromSupabase.current && shouldSync('priorities')) {
+      recordSync('priorities');
       syncPrioritiesToSupabase(priorities);
     }
   }, [priorities, user]);
 
   useEffect(() => {
     localStorage.setItem('tasks', JSON.stringify(tasks));
-    if (user && hasLoadedFromSupabase.current) {
+    if (user && hasLoadedFromSupabase.current && shouldSync('tasks')) {
+      recordSync('tasks');
       syncTasksToSupabase(tasks);
     }
   }, [tasks, user]);
 
   useEffect(() => {
     localStorage.setItem('gpa', gpa.toString());
-    if (user && hasLoadedFromSupabase.current) {
+    if (user && hasLoadedFromSupabase.current && shouldSync('gpa')) {
+      recordSync('gpa');
       syncGPAToSupabase(gpa, targetGpa);
     }
   }, [gpa, user]);
 
   useEffect(() => {
     localStorage.setItem('targetGpa', targetGpa.toString());
-    if (user && hasLoadedFromSupabase.current) {
+    if (user && hasLoadedFromSupabase.current && shouldSync('gpa')) {
+      recordSync('gpa');
       syncGPAToSupabase(gpa, targetGpa);
     }
   }, [targetGpa, user]);
 
   useEffect(() => {
     localStorage.setItem('pomodoroSettings', JSON.stringify(pomodoroSettings));
-    if (user && hasLoadedFromSupabase.current) {
+    if (user && hasLoadedFromSupabase.current && shouldSync('pomodoro')) {
+      recordSync('pomodoro');
       syncPomodoroToSupabase(pomodoroSettings);
     }
   }, [pomodoroSettings, user]);
@@ -168,7 +189,8 @@ export const AppProvider = ({ children }) => {
 
   useEffect(() => {
     localStorage.setItem('exams', JSON.stringify(exams));
-    if (user && hasLoadedFromSupabase.current) {
+    if (user && hasLoadedFromSupabase.current && shouldSync('exams')) {
+      recordSync('exams');
       syncExamsToSupabase(exams);
     }
   }, [exams, user]);
