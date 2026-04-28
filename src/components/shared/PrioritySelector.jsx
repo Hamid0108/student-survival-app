@@ -35,16 +35,16 @@ export default function PrioritySelector({ onSelect, selectedPriority, showManag
     deletePriority(id);
   };
 
-  const getTailwindColor = (color) => {
+  const getColorStyles = (color) => {
     const colorMap = {
-      red: 'bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/20',
-      yellow: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20 hover:bg-yellow-500/20',
-      blue: 'bg-blue-500/10 text-blue-500 border-blue-500/20 hover:bg-blue-500/20',
-      green: 'bg-green-500/10 text-green-500 border-green-500/20 hover:bg-green-500/20',
-      purple: 'bg-purple-500/10 text-purple-500 border-purple-500/20 hover:bg-purple-500/20',
-      pink: 'bg-pink-500/10 text-pink-500 border-pink-500/20 hover:bg-pink-500/20',
-      indigo: 'bg-indigo-500/10 text-indigo-500 border-indigo-500/20 hover:bg-indigo-500/20',
-      cyan: 'bg-cyan-500/10 text-cyan-500 border-cyan-500/20 hover:bg-cyan-500/20',
+      red: { border: 'rgb(239, 68, 68)', bg: 'rgba(239, 68, 68, 0.2)', text: 'rgb(252, 165, 165)' },
+      yellow: { border: 'rgb(202, 138, 4)', bg: 'rgba(202, 138, 4, 0.2)', text: 'rgb(253, 224, 71)' },
+      blue: { border: 'rgb(59, 130, 246)', bg: 'rgba(59, 130, 246, 0.2)', text: 'rgb(147, 197, 253)' },
+      green: { border: 'rgb(34, 197, 94)', bg: 'rgba(34, 197, 94, 0.2)', text: 'rgb(134, 239, 172)' },
+      purple: { border: 'rgb(147, 51, 234)', bg: 'rgba(147, 51, 234, 0.2)', text: 'rgb(196, 181, 253)' },
+      pink: { border: 'rgb(236, 72, 153)', bg: 'rgba(236, 72, 153, 0.2)', text: 'rgb(249, 168, 212)' },
+      indigo: { border: 'rgb(99, 102, 241)', bg: 'rgba(99, 102, 241, 0.2)', text: 'rgb(199, 210, 254)' },
+      cyan: { border: 'rgb(34, 211, 238)', bg: 'rgba(34, 211, 238, 0.2)', text: 'rgb(165, 243, 252)' },
     };
     return colorMap[color] || colorMap.blue;
   };
@@ -54,19 +54,24 @@ export default function PrioritySelector({ onSelect, selectedPriority, showManag
       {/* Priority Selector for Tasks */}
       {onSelect && (
         <div className="flex flex-wrap gap-1 sm:gap-2 mb-4">
-          {priorities.map(priority => (
-            <button
-              key={priority.id}
-              onClick={() => onSelect(priority.name)}
-              className={`px-2 sm:px-4 py-1 sm:py-2 rounded-lg border-2 font-medium text-sm sm:text-base transition-all ${
-                selectedPriority === priority.name
-                  ? `border-${priority.color}-500 bg-${priority.color}-500/20 text-${priority.color}-300`
-                  : `border-slate-600 text-slate-400 hover:border-slate-500`
-              }`}
-            >
-              {priority.emoji} <span className="hidden sm:inline">{priority.name}</span>
-            </button>
-          ))}
+          {priorities.map(priority => {
+            const colors = getColorStyles(priority.color);
+            const isSelected = selectedPriority === priority.name;
+            return (
+              <button
+                key={priority.id}
+                onClick={() => onSelect(priority.name)}
+                className="px-2 sm:px-4 py-1 sm:py-2 rounded-lg border-2 font-medium text-sm sm:text-base transition-all"
+                style={{
+                  borderColor: isSelected ? colors.border : 'rgb(71, 85, 105)',
+                  backgroundColor: isSelected ? colors.bg : 'transparent',
+                  color: isSelected ? colors.text : 'rgb(148, 163, 184)',
+                }}
+              >
+                {priority.emoji} <span className="hidden sm:inline">{priority.name}</span>
+              </button>
+            );
+          })}
         </div>
       )}
 
@@ -167,31 +172,39 @@ export default function PrioritySelector({ onSelect, selectedPriority, showManag
           )}
 
           <div className="space-y-2">
-            {priorities.map(priority => (
-              <div
-                key={priority.id}
-                className={`flex items-center justify-between p-3 rounded-lg border ${getTailwindColor(priority.color)}`}
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">{priority.emoji}</span>
-                  <span className="font-medium">{priority.name}</span>
+            {priorities.map(priority => {
+              const colors = getColorStyles(priority.color);
+              return (
+                <div
+                  key={priority.id}
+                  className="flex items-center justify-between p-3 rounded-lg border"
+                  style={{
+                    borderColor: colors.border,
+                    backgroundColor: colors.bg,
+                    color: colors.text,
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">{priority.emoji}</span>
+                    <span className="font-medium">{priority.name}</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => startEdit(priority)}
+                      className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(priority.id)}
+                      className="p-2 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => startEdit(priority)}
-                    className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                  >
-                    <Edit2 className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(priority.id)}
-                    className="p-2 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
