@@ -11,11 +11,7 @@ export const AppProvider = ({ children }) => {
   // Priorities state
   const [priorities, setPriorities] = useState(() => {
     const saved = localStorage.getItem('priorities');
-    return saved ? JSON.parse(saved) : [
-      { id: '1', name: 'High', color: 'red', emoji: '🔥' },
-      { id: '2', name: 'Medium', color: 'yellow', emoji: '⚡' },
-      { id: '3', name: 'Low', color: 'blue', emoji: '💙' },
-    ];
+    return saved ? JSON.parse(saved) : [];
   });
 
   // Tasks state
@@ -68,11 +64,7 @@ export const AppProvider = ({ children }) => {
       // Reset flag and clear state when user logs out
       hasLoadedFromSupabase.current = false;
       setTasks([]);
-      setPriorities([
-        { id: '1', name: 'High', color: 'red', emoji: '🔥' },
-        { id: '2', name: 'Medium', color: 'yellow', emoji: '⚡' },
-        { id: '3', name: 'Low', color: 'blue', emoji: '💙' },
-      ]);
+      setPriorities([]);
       setGpa(1.75);
       setTargetGpa(3.5);
       setPomodoroSettings({
@@ -97,16 +89,12 @@ export const AppProvider = ({ children }) => {
           supabaseService.pomodoroService.fetchSettings(user.id),
         ]);
 
-      // Load from Supabase if data exists, otherwise keep defaults
-      if (tasksData && tasksData.length > 0) {
-        setTasks(tasksData);
-        localStorage.setItem('tasks', JSON.stringify(tasksData));
-      }
+      // Load from Supabase - always set to avoid stale data from previous user
+      setTasks(tasksData);
+      localStorage.setItem('tasks', JSON.stringify(tasksData));
 
-      if (prioritiesData && prioritiesData.length > 0) {
-        setPriorities(prioritiesData);
-        localStorage.setItem('priorities', JSON.stringify(prioritiesData));
-      }
+      setPriorities(prioritiesData);
+      localStorage.setItem('priorities', JSON.stringify(prioritiesData));
 
       if (examsData && examsData.length > 0) {
         setExams(examsData);
@@ -209,7 +197,8 @@ export const AppProvider = ({ children }) => {
     if (!user) return;
     try {
       for (const priority of prioritiesToSync) {
-        if (typeof priority.id === 'string' && priority.id.length < 20) {
+        // Skip default priority IDs and only sync local (temporary) IDs
+        if (typeof priority.id === 'string' && priority.id.length < 20 && !['1', '2', '3'].includes(priority.id)) {
           const newPriority = await supabaseService.prioritiesService.addPriority(
             user.id,
             priority
