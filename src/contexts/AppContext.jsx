@@ -59,11 +59,29 @@ export const AppProvider = ({ children }) => {
     return saved ? JSON.parse(saved) : [];
   });
 
-  // Fetch data from Supabase on login
+  // Fetch data from Supabase on login, clear on logout
   useEffect(() => {
     if (user && !hasLoadedFromSupabase.current) {
       loadDataFromSupabase();
       hasLoadedFromSupabase.current = true;
+    } else if (!user) {
+      // Reset flag and clear state when user logs out
+      hasLoadedFromSupabase.current = false;
+      setTasks([]);
+      setPriorities([
+        { id: '1', name: 'High', color: 'red', emoji: '🔥' },
+        { id: '2', name: 'Medium', color: 'yellow', emoji: '⚡' },
+        { id: '3', name: 'Low', color: 'blue', emoji: '💙' },
+      ]);
+      setGpa(1.75);
+      setTargetGpa(3.5);
+      setPomodoroSettings({
+        workDuration: 25,
+        breakDuration: 5,
+        sessionsCompleted: 0,
+      });
+      setWeeklyReview([]);
+      setExams([]);
     }
   }, [user]);
 
