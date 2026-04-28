@@ -116,47 +116,68 @@ export const prioritiesService = {
 // ============ GPA ============
 export const gpaService = {
   async fetchGPA(userId) {
-    const { data, error } = await supabase
-      .from('gpa_records')
-      .select('*')
-      .eq('user_id', userId)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('gpa_records')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
 
-    if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows
-    return data || null;
+      if (error && error.code !== 'PGRST116') {
+        // Log error but don't throw - return null to allow app to continue
+        console.error('Error fetching GPA:', error);
+        return null;
+      }
+      return data || null;
+    } catch (err) {
+      // Handle network or other errors gracefully
+      console.error('Error fetching GPA:', err);
+      return null;
+    }
   },
 
   async upsertGPA(userId, gpaData) {
-    const existing = await this.fetchGPA(userId);
+    try {
+      const existing = await this.fetchGPA(userId);
 
-    if (existing) {
-      const { data, error } = await supabase
-        .from('gpa_records')
-        .update({
-          current_gpa: gpaData.current_gpa,
-          target_gpa: gpaData.target_gpa,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', existing.id)
-        .eq('user_id', userId)
-        .select();
-
-      if (error) throw error;
-      return data?.[0];
-    } else {
-      const { data, error } = await supabase
-        .from('gpa_records')
-        .insert([
-          {
-            user_id: userId,
+      if (existing) {
+        const { data, error } = await supabase
+          .from('gpa_records')
+          .update({
             current_gpa: gpaData.current_gpa,
             target_gpa: gpaData.target_gpa,
-          },
-        ])
-        .select();
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', existing.id)
+          .eq('user_id', userId)
+          .select();
 
-      if (error) throw error;
-      return data?.[0];
+        if (error) {
+          console.error('Error updating GPA:', error);
+          return null;
+        }
+        return data?.[0];
+      } else {
+        const { data, error } = await supabase
+          .from('gpa_records')
+          .insert([
+            {
+              user_id: userId,
+              current_gpa: gpaData.current_gpa,
+              target_gpa: gpaData.target_gpa,
+            },
+          ])
+          .select();
+
+        if (error) {
+          console.error('Error inserting GPA:', error);
+          return null;
+        }
+        return data?.[0];
+      }
+    } catch (err) {
+      console.error('Error upserting GPA:', err);
+      return null;
     }
   },
 };

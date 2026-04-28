@@ -171,11 +171,17 @@ export const AppProvider = ({ children }) => {
         localStorage.setItem('weeklyReview', JSON.stringify(reviewsData));
       }
 
-      if (gpaData) {
-        setGpa(gpaData.current_gpa);
-        setTargetGpa(gpaData.target_gpa);
-        localStorage.setItem('gpa', gpaData.current_gpa.toString());
-        localStorage.setItem('targetGpa', gpaData.target_gpa.toString());
+      // Fetch GPA data - skip if fetch fails to prevent errors
+      try {
+        const gpaData = await supabaseService.gpaService.fetchGPA(currentUser.id);
+        if (gpaData) {
+          setGpa(gpaData.current_gpa);
+          setTargetGpa(gpaData.target_gpa);
+          localStorage.setItem('gpa', gpaData.current_gpa.toString());
+          localStorage.setItem('targetGpa', gpaData.target_gpa.toString());
+        }
+      } catch (err) {
+        console.error('GPA fetch failed, using default values:', err);
       }
 
       if (pomodoroData) {
