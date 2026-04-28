@@ -54,14 +54,14 @@ export default function Layout({ children }) {
       {/* Mobile Header + Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Mobile Header */}
-        <div className="md:hidden flex items-center justify-between bg-gradient-to-r from-slate-800 to-slate-900 border-b border-slate-700 p-4">
-          <h1 className="text-xl font-black text-white flex items-center gap-2">
-            <Zap className="w-5 h-5 text-blue-400" />
-            StudySurvival
+        <div className="md:hidden flex items-center justify-between bg-gradient-to-r from-slate-800 to-slate-900 border-b border-slate-700 p-4 gap-2">
+          <h1 className="text-lg font-black text-white flex items-center gap-2 flex-1 truncate">
+            <Zap className="w-5 h-5 text-blue-400 flex-shrink-0" />
+            <span className="truncate">StudySurvival</span>
           </h1>
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="p-2 text-white hover:bg-slate-700 rounded-lg transition-colors"
+            className="p-2 text-white hover:bg-slate-700 rounded-lg transition-colors flex-shrink-0"
           >
             {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
