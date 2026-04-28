@@ -28,7 +28,7 @@ export const tasksService = {
           done: task.done || false,
           priority: task.priority,
           date: task.date,
-          due_date: task.dueDate,
+          duedate: task.dueDate,
         },
       ])
       .select();
@@ -311,7 +311,7 @@ export const batchService = {
       done: t.done,
       priority: t.priority,
       date: t.date,
-      due_date: t.dueDate,  // Convert camelCase to snake_case
+      duedate: t.dueDate,
       created_at: t.created_at || new Date().toISOString(),
     }));
 
