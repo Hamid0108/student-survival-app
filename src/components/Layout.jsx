@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, Zap, BookOpen, Clock, Target, Brain, BarChart3, Calendar, LogOut } from 'lucide-react';
+import { Menu, X, Zap, BookOpen, Clock, Target, Brain, BarChart3, Calendar, LogOut, Settings } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import MigrationDialog from './MigrationDialog';
+import SyncStatus from './SyncStatus';
 
 export default function Layout({ children }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,6 +24,7 @@ export default function Layout({ children }) {
     { path: '/exam-prep', icon: Brain, label: 'Exam Prep', mobile: false },
     { path: '/weekly-review', icon: BarChart3, label: 'Weekly Review', mobile: false },
     { path: '/calendar', icon: Calendar, label: 'Calendar', mobile: true },
+    { path: '/settings', icon: Settings, label: 'Settings', mobile: true },
   ];
 
   const isActive = (path) => location.pathname === path;
@@ -35,6 +38,7 @@ export default function Layout({ children }) {
             <Zap className="w-6 h-6 text-blue-400" />
             <span className="text-sm font-semibold text-slate-300">StudySurvival</span>
           </div>
+          <SyncStatus />
         </div>
 
         <nav className="flex-1 space-y-2">
@@ -127,6 +131,9 @@ export default function Layout({ children }) {
           {children}
         </main>
       </div>
+
+      {/* Migration Dialog */}
+      <MigrationDialog />
     </div>
   );
 }
