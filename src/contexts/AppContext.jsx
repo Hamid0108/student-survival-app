@@ -94,6 +94,7 @@ export const AppProvider = ({ children }) => {
       localStorage.removeItem('pomodoroSettings');
       localStorage.removeItem('weeklyReview');
       localStorage.removeItem('exams');
+      localStorage.removeItem('migrationAsked');
 
       setTasks([]);
       setPriorities([]);
@@ -110,16 +111,24 @@ export const AppProvider = ({ children }) => {
   }, [user]);
 
   const loadDataFromSupabase = async () => {
+    // Capture the user at the time this function is called
+    const currentUser = user;
+
     try {
       const [tasksData, prioritiesData, examsData, reviewsData, gpaData, pomodoroData] =
         await Promise.all([
-          supabaseService.tasksService.fetchTasks(user.id),
-          supabaseService.prioritiesService.fetchPriorities(user.id),
-          supabaseService.examsService.fetchExams(user.id),
-          supabaseService.reviewsService.fetchReviews(user.id),
-          supabaseService.gpaService.fetchGPA(user.id),
-          supabaseService.pomodoroService.fetchSettings(user.id),
+          supabaseService.tasksService.fetchTasks(currentUser.id),
+          supabaseService.prioritiesService.fetchPriorities(currentUser.id),
+          supabaseService.examsService.fetchExams(currentUser.id),
+          supabaseService.reviewsService.fetchReviews(currentUser.id),
+          supabaseService.gpaService.fetchGPA(currentUser.id),
+          supabaseService.pomodoroService.fetchSettings(currentUser.id),
         ]);
+
+      // Ignore results if user has changed since the load started (stale data)
+      if (user?.id !== currentUser.id) {
+        return;
+      }
 
       // Load from Supabase - always set to avoid stale data from previous user
       setTasks(tasksData);
