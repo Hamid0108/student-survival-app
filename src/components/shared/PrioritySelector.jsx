@@ -103,15 +103,28 @@ export default function PrioritySelector({ onSelect, selectedPriority, showManag
               <div>
                 <label className="block text-sm text-slate-300 mb-2">Color</label>
                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                  {colors.map(color => (
-                    <button
-                      key={color}
-                      onClick={() => setFormData({ ...formData, color })}
-                      className={`w-full h-10 rounded-lg border-2 ${
-                        formData.color === color ? 'border-white' : 'border-transparent'
-                      } bg-${color}-500/30`}
-                    />
-                  ))}
+                  {colors.map(color => {
+                    const colorHex = {
+                      red: '239, 68, 68',
+                      yellow: '202, 138, 4',
+                      blue: '59, 130, 246',
+                      green: '34, 197, 94',
+                      purple: '147, 51, 234',
+                      pink: '236, 72, 153',
+                      indigo: '99, 102, 241',
+                      cyan: '34, 211, 238',
+                    };
+                    return (
+                      <button
+                        key={color}
+                        onClick={() => setFormData({ ...formData, color })}
+                        className={`w-full h-10 rounded-lg border-2 ${
+                          formData.color === color ? 'border-white' : 'border-transparent'
+                        }`}
+                        style={{ backgroundColor: `rgba(${colorHex[color]}, 0.3)` }}
+                      />
+                    );
+                  })}
                 </div>
               </div>
 

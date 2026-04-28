@@ -112,6 +112,30 @@ export const AppProvider = ({ children }) => {
       setPriorities(prioritiesData);
       localStorage.setItem('priorities', JSON.stringify(prioritiesData));
 
+      // Create default priorities for new users with no priorities
+      if (!prioritiesData || prioritiesData.length === 0) {
+        const defaultPriorities = [
+          { name: 'High', color: 'red', emoji: '🔥' },
+          { name: 'Medium', color: 'yellow', emoji: '⚡' },
+          { name: 'Low', color: 'blue', emoji: '💙' },
+        ];
+
+        // Add each default priority to Supabase
+        for (const defaultPriority of defaultPriorities) {
+          try {
+            const newPriority = await supabaseService.prioritiesService.addPriority(user.id, defaultPriority);
+            if (newPriority) {
+              prioritiesData.push(newPriority);
+            }
+          } catch (error) {
+            console.error('Error creating default priority:', error);
+          }
+        }
+
+        setPriorities(prioritiesData);
+        localStorage.setItem('priorities', JSON.stringify(prioritiesData));
+      }
+
       if (examsData && examsData.length > 0) {
         setExams(examsData);
         localStorage.setItem('exams', JSON.stringify(examsData));
