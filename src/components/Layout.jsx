@@ -1,10 +1,18 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Zap, BookOpen, Clock, Target, Brain, BarChart3, Calendar } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Menu, X, Zap, BookOpen, Clock, Target, Brain, BarChart3, Calendar, LogOut } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Layout({ children }) {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/login');
+  };
 
   const navItems = [
     { path: '/', icon: Zap, label: 'Dashboard', mobile: true },
@@ -46,7 +54,20 @@ export default function Layout({ children }) {
           ))}
         </nav>
 
-        <div className="pt-4 border-t border-slate-700">
+        <div className="pt-4 border-t border-slate-700 space-y-4">
+          {user && (
+            <div className="bg-slate-900/50 rounded-lg p-3">
+              <p className="text-xs text-slate-400">Logged in as</p>
+              <p className="text-sm font-medium text-white truncate">{user.email}</p>
+            </div>
+          )}
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-700/30 hover:bg-slate-700 text-slate-300 hover:text-white transition-all text-sm font-medium"
+          >
+            <LogOut className="w-4 h-4" />
+            Logout
+          </button>
           <p className="text-xs text-slate-500 text-center">Stay focused. You've got this! 💪</p>
         </div>
       </aside>
@@ -85,6 +106,19 @@ export default function Layout({ children }) {
                 <span className="font-medium">{item.label}</span>
               </Link>
             ))}
+            {user && (
+              <div className="mt-4 pt-4 border-t border-slate-700 space-y-2">
+                <p className="text-xs text-slate-400 px-4">Logged in as</p>
+                <p className="text-sm font-medium text-white px-4 truncate">{user.email}</p>
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-2 px-4 py-3 rounded-lg bg-slate-700/30 hover:bg-slate-700 text-slate-300 hover:text-white transition-all text-sm font-medium"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </button>
+              </div>
+            )}
           </nav>
         )}
 
