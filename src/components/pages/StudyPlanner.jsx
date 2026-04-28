@@ -70,7 +70,7 @@ export default function StudyPlanner() {
           />
 
           {/* Task Input */}
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <input
               value={newTaskText}
               onChange={(e) => setNewTaskText(e.target.value)}
@@ -80,7 +80,7 @@ export default function StudyPlanner() {
             />
             <button
               onClick={handleAddTask}
-              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg"
+              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold px-4 sm:px-6 py-3 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg whitespace-nowrap"
             >
               Add
             </button>
