@@ -61,7 +61,7 @@ export default function Layout({ children }) {
           </h1>
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+            className="p-2 text-white hover:bg-slate-700 rounded-lg transition-colors"
           >
             {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
