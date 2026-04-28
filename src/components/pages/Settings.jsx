@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { Lock, LogOut, AlertCircle, CheckCircle2, Loader } from 'lucide-react';
 
 export default function Settings() {
