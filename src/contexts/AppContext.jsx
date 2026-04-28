@@ -77,8 +77,24 @@ export const AppProvider = ({ children }) => {
       loadDataFromSupabase();
       hasLoadedFromSupabase.current = true;
     } else if (!user) {
-      // Reset flag and clear state when user logs out
+      // Reset flag, sync timers, clear state, and clear localStorage when user logs out
       hasLoadedFromSupabase.current = false;
+      lastSyncTimeRef.current = {
+        tasks: 0,
+        priorities: 0,
+        gpa: 0,
+        exams: 0,
+        pomodoro: 0,
+      };
+      // Clear localStorage to prevent data leaking to next user
+      localStorage.removeItem('tasks');
+      localStorage.removeItem('priorities');
+      localStorage.removeItem('gpa');
+      localStorage.removeItem('targetGpa');
+      localStorage.removeItem('pomodoroSettings');
+      localStorage.removeItem('weeklyReview');
+      localStorage.removeItem('exams');
+
       setTasks([]);
       setPriorities([]);
       setGpa(1.75);
