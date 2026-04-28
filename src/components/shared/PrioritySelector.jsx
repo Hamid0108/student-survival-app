@@ -53,18 +53,18 @@ export default function PrioritySelector({ onSelect, selectedPriority, showManag
     <div>
       {/* Priority Selector for Tasks */}
       {onSelect && (
-        <div className="flex flex-wrap gap-2 mb-4">
+        <div className="flex flex-wrap gap-1 sm:gap-2 mb-4">
           {priorities.map(priority => (
             <button
               key={priority.id}
               onClick={() => onSelect(priority.name)}
-              className={`px-4 py-2 rounded-lg border-2 font-medium transition-all ${
+              className={`px-2 sm:px-4 py-1 sm:py-2 rounded-lg border-2 font-medium text-sm sm:text-base transition-all ${
                 selectedPriority === priority.name
                   ? `border-${priority.color}-500 bg-${priority.color}-500/20 text-${priority.color}-300`
                   : `border-slate-600 text-slate-400 hover:border-slate-500`
               }`}
             >
-              {priority.emoji} {priority.name}
+              {priority.emoji} <span className="hidden sm:inline">{priority.name}</span>
             </button>
           ))}
         </div>
