@@ -340,17 +340,8 @@ export const AppProvider = ({ children }) => {
       dueDate,
     };
     setTasks([...tasks, newTask]);
-
-    if (user) {
-      supabaseService.tasksService
-        .addTask(user.id, newTask)
-        .then((result) => {
-          if (result) {
-            setTasks((prev) => prev.map((t) => (t.id === newTask.id ? result : t)));
-          }
-        })
-        .catch((error) => console.error('Error adding task to Supabase:', error));
-    }
+    // Note: Syncing to Supabase is handled by the useEffect that watches tasks changes
+    // This prevents duplicate adds to Supabase
   };
 
   const toggleTask = (id) => {

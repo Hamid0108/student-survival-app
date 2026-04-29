@@ -8,12 +8,14 @@ export default function StudyPlanner() {
   const { tasks, addTask, priorities } = useApp();
   const [newTaskText, setNewTaskText] = useState('');
   const [selectedPriority, setSelectedPriority] = useState(priorities[0]?.name || 'High');
+  const [selectedDueDate, setSelectedDueDate] = useState('');
   const [showPrioritySettings, setShowPrioritySettings] = useState(false);
 
   const handleAddTask = () => {
     if (!newTaskText.trim()) return;
-    addTask(newTaskText, selectedPriority);
+    addTask(newTaskText, selectedPriority, selectedDueDate || null);
     setNewTaskText('');
+    setSelectedDueDate('');
   };
 
   const handleKeyPress = (e) => {
@@ -68,6 +70,17 @@ export default function StudyPlanner() {
             onSelect={setSelectedPriority}
             selectedPriority={selectedPriority}
           />
+
+          {/* Due Date Input */}
+          <div>
+            <label className="text-sm font-medium text-slate-300 mb-1 block">Due Date (Optional)</label>
+            <input
+              type="date"
+              value={selectedDueDate}
+              onChange={(e) => setSelectedDueDate(e.target.value)}
+              className="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+            />
+          </div>
 
           {/* Task Input */}
           <div className="flex flex-col sm:flex-row gap-3">
